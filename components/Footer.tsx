@@ -59,39 +59,39 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="border-t border-border/50 bg-background">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+    <footer className="border-t border-stone-200 dark:border-neutral-800 bg-white dark:bg-neutral-950">
+      <div className="max-w-7xl mx-auto px-6 py-16">
         
         {/* Main Footer Content */}
-        <div className="grid lg:grid-cols-5 gap-8 mb-8">
+        <div className="grid lg:grid-cols-5 gap-12 mb-12">
           
           {/* Brand Section */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-4 no-underline">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-primary-foreground" fill="currentColor" viewBox="0 0 24 24">
+            <Link href="/" className="flex items-center gap-3 mb-6 no-underline">
+              <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
                 </svg>
               </div>
               <div>
-                <div className="text-xl font-bold text-foreground">Artisans Marketplace</div>
-                <div className="text-xs text-muted-foreground">Discover • Create • Connect</div>
+                <div className="text-2xl font-extrabold text-neutral-900 dark:text-neutral-50">Artisans Marketplace</div>
+                <div className="text-sm text-neutral-600 dark:text-neutral-400 font-medium">Discover • Create • Connect</div>
               </div>
             </Link>
             
-            <p className="text-muted-foreground leading-relaxed mb-6 max-w-sm">
+            <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed mb-8 max-w-md text-lg">
               Connecting talented artisans with art lovers worldwide. Discover unique handcrafted pieces and support creative communities.
             </p>
             
             {/* Follow Us */}
-            <div className="mb-6">
-              <h4 className="font-bold text-foreground mb-3">Follow Us:</h4>
+            <div>
+              <h4 className="font-bold text-neutral-900 dark:text-neutral-100 mb-4 text-lg">Follow Us:</h4>
               <div className="flex items-center gap-3">
                 {socialLinks.map((social) => (
                   <Link
                     key={social.name}
                     href={social.href}
-                    className="w-10 h-10 bg-secondary hover:bg-primary border border-border hover:border-primary rounded-xl flex items-center justify-center text-muted-foreground hover:text-primary-foreground transition-all duration-300 no-underline"
+                    className="w-12 h-12 bg-stone-50 hover:bg-primary dark:bg-neutral-900 dark:hover:bg-primary border border-stone-200 dark:border-neutral-800 hover:border-primary rounded-2xl flex items-center justify-center text-neutral-600 dark:text-neutral-400 hover:text-white transition-all duration-300 no-underline hover:scale-105"
                   >
                     {social.icon}
                   </Link>
@@ -103,19 +103,19 @@ export default function Footer() {
           {/* Navigation Links - 3 Columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
             <div key={category}>
-              <h4 className="font-bold text-foreground mb-4 uppercase tracking-wider text-sm">{category}</h4>
-              <ul className="space-y-3">
+              <h4 className="font-bold text-neutral-900 dark:text-neutral-100 mb-6 uppercase tracking-wider text-sm">{category}</h4>
+              <ul className="space-y-4">
                 {links.map((link) => (
                   <li key={link.name}>
                     <Link 
                       href={link.href}
-                      className="flex items-center gap-3 text-muted-foreground hover:text-foreground font-medium transition-all duration-200 group no-underline"
+                      className="flex items-center gap-3 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 font-medium transition-all duration-300 group no-underline"
                     >
-                      <div className="text-muted-foreground/60 group-hover:text-foreground transition-colors">
+                      <div className="text-neutral-500 dark:text-neutral-500 group-hover:text-primary transition-colors duration-300">
                         {link.icon}
                       </div>
-                      <span className="group-hover:translate-x-1 transition-transform duration-200">{link.name}</span>
-                      <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-200 -translate-x-2 group-hover:translate-x-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <span className="group-hover:translate-x-1 transition-transform duration-300">{link.name}</span>
+                      <svg className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
                       </svg>
                     </Link>
@@ -127,29 +127,29 @@ export default function Footer() {
         </div>
 
         {/* Newsletter Section */}
-        <div className="bg-muted/40 border border-border/50 rounded-2xl p-6 mb-4">
-          <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center">
+        <div className="bg-stone-50 dark:bg-neutral-900 border border-stone-200 dark:border-neutral-800 rounded-3xl p-8 mb-8">
+          <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center">
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center">
-                  <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-2xl flex items-center justify-center">
+                  <svg className="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                     <path d="M3 8l7.89 3.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold">Stay in the Loop</h3>
+                <h3 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">Stay in the Loop</h3>
               </div>
-              <p className="text-muted-foreground">
+              <p className="text-neutral-600 dark:text-neutral-400 text-lg leading-relaxed">
                 Get the latest updates on new artists, featured collections, and exclusive offers.
               </p>
             </div>
-            <div className="w-full lg:w-auto lg:min-w-[350px]">
+            <div className="w-full lg:w-auto lg:min-w-[400px]">
               <div className="flex flex-col sm:flex-row gap-3">
                 <input 
                   type="email" 
                   placeholder="Enter your email address"
-                  className="flex-1 px-4 py-3 bg-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
+                  className="flex-1 px-6 py-4 bg-white dark:bg-neutral-800 border border-stone-200 dark:border-neutral-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-300 text-lg"
                 />
-                <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-xl font-semibold transition-all duration-200 whitespace-nowrap">
+                <button className="bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 hover:scale-[1.02] whitespace-nowrap">
                   Subscribe
                 </button>
               </div>
@@ -158,21 +158,21 @@ export default function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-4 pt-6 border-t border-border/50">
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-6 pt-8 border-t border-stone-200 dark:border-neutral-800">
           <div className="flex flex-col lg:flex-row items-center gap-4">
-            <p className="text-sm text-muted-foreground font-medium">
+            <p className="text-neutral-600 dark:text-neutral-400 font-medium">
               © 2025 Artisans Marketplace. All rights reserved.
             </p>
           </div>
           
-          <div className="flex items-center gap-6">
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground font-medium transition-colors duration-200 no-underline">
+          <div className="flex items-center gap-8">
+            <Link href="#" className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 font-medium transition-colors duration-300 no-underline">
               Privacy Policy
             </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground font-medium transition-colors duration-200 no-underline">
+            <Link href="#" className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 font-medium transition-colors duration-300 no-underline">
               Terms of Service
             </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground font-medium transition-colors duration-200 no-underline">
+            <Link href="#" className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 font-medium transition-colors duration-300 no-underline">
               Cookie Settings
             </Link>
           </div>

@@ -1,24 +1,20 @@
+'use client'
+
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
+import AboutHeroSection from '../../../sections/about/AboutHeroSection';
+import AboutStorySection from '../../../sections/about/AboutStorySection';
+import AboutImpactSection from '../../../sections/about/AboutImpactSection';
+import AboutTeamSection from '../../../sections/about/AboutTeamSection';
 
-export default function About() {
+export default function About(): React.ReactNode {
   return (
-    <div className="font-sans min-h-screen bg-white">
+    <div className="font-sans min-h-screen bg-white dark:bg-neutral-950">
       <Header />
-      
-      <section className="px-6 py-20 md:py-32">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-            About Us
-            <br />
-            <span className="text-blue-600">Page</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-12 leading-relaxed">
-            This is your about page content.
-          </p>
-        </div>
-      </section>
-
+      <AboutHeroSection />
+      <AboutStorySection />
+      <AboutImpactSection />
+      <AboutTeamSection />
       <Footer />
     </div>
   );
