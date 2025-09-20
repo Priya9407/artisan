@@ -2,24 +2,56 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const navItems = [
   { name: 'Home', href: '/', icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> },
   { name: 'About', href: '/about', icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> },
   { name: 'For Artists', href: '/for-artists', icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg> },
-  { name: 'Browse Art', href: '/browse', icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg> }
+  { name: 'Marketplace', href: '/marketplace', icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg> }
 ];
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   const activeItem = navItems.find(item => 
     pathname === item.href || (pathname === '/' && item.name === 'Home')
   )?.name || 'Home';
+
+  // Check authentication status
+  const checkAuthStatus = () => {
+    try {
+      const authToken = localStorage.getItem('authToken');
+      const userStr = localStorage.getItem('user');
+      
+      if (authToken && userStr) {
+        const userData = JSON.parse(userStr);
+        setUser(userData);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Auth check error:', error);
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -30,16 +62,49 @@ export default function Header() {
       document.documentElement.classList.add('dark');
     }
 
+    // Check auth status on mount and set up storage listener
+    checkAuthStatus();
+    
+    // Listen for storage changes (when user logs in/out in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'authToken' || e.key === 'user') {
+        checkAuthStatus();
+      }
+    };
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('storage', handleStorageChange);
     document.body.style.overflow = isMenuOpen ? 'hidden' : '';
     
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [isMenuOpen]);
+
+  // Listen for auth changes from within the same tab
+  useEffect(() => {
+    const interval = setInterval(checkAuthStatus, 1000); // Check every second
+    return () => clearInterval(interval);
+  }, []);
 
   const toggleDarkMode = () => {
     setIsDark(!isDark);
     document.documentElement.classList.toggle('dark');
     localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    setUser(null);
+    setIsAuthenticated(false);
+    setShowUserMenu(false);
+    router.push('/');
+  };
+
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
@@ -84,26 +149,112 @@ export default function Header() {
             <button 
               onClick={toggleDarkMode} 
               className="p-3 hover:bg-stone-50 dark:hover:bg-neutral-900 rounded-2xl transition-all duration-300"
+              aria-label="Toggle dark mode"
             >
               {isDark ? 
                 <svg className="w-5 h-5 text-neutral-600 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg> :
                 <svg className="w-5 h-5 text-neutral-600 dark:text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
               }
             </button>
-            <button className="flex items-center gap-2 px-4 py-3 font-semibold rounded-2xl hover:bg-stone-50 dark:hover:bg-neutral-900 transition-all duration-300 text-neutral-700 dark:text-neutral-300">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-              Sign In
-            </button>
-            <button className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 hover:scale-[1.02]">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-              Get Started
-            </button>
+            
+            {/* Conditional Authentication Controls */}
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-3 px-4 py-3 font-semibold rounded-2xl hover:bg-stone-50 dark:hover:bg-neutral-900 transition-all duration-300 text-neutral-700 dark:text-neutral-300"
+                >
+                  <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center text-sm font-bold">
+                    {user ? getInitials(user.name) : 'U'}
+                  </div>
+                  <span className="hidden lg:block">{user?.name || 'User'}</span>
+                  <svg className={`w-4 h-4 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                    <path d="m6 9 6 6 6-6"/>
+                  </svg>
+                </button>
+
+                {/* User Dropdown Menu */}
+                {showUserMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-neutral-900 rounded-2xl shadow-xl border border-stone-200/60 dark:border-neutral-800/60 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-stone-200 dark:border-neutral-800">
+                      <p className="font-semibold text-neutral-900 dark:text-neutral-100">{user?.name}</p>
+                      <p className="text-sm text-neutral-600 dark:text-neutral-400">{user?.email}</p>
+                      <span className="inline-block px-2 py-1 bg-primary/10 text-primary text-xs font-medium rounded-lg mt-1 capitalize">
+                        {user?.role || 'Artist'}
+                      </span>
+                    </div>
+                    <div className="py-2">
+                      <Link
+                        href="/for-artists"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-stone-50 dark:hover:bg-neutral-800 transition-colors no-underline"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                          <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/marketplace"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-stone-50 dark:hover:bg-neutral-800 transition-colors no-underline"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                          <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                        </svg>
+                        My Orders
+                      </Link>
+                      <Link
+                        href="/settings"
+                        onClick={() => setShowUserMenu(false)}
+                        className="flex items-center gap-3 px-4 py-3 text-neutral-700 dark:text-neutral-300 hover:bg-stone-50 dark:hover:bg-neutral-800 transition-colors no-underline"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                          <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Settings
+                      </Link>
+                      <div className="border-t border-stone-200 dark:border-neutral-800 mt-2 pt-2">
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-3 w-full px-4 py-3 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-left"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                            <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                          </svg>
+                          Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link 
+                  href="/auth"
+                  className="flex items-center gap-2 px-4 py-3 font-semibold rounded-2xl hover:bg-stone-50 dark:hover:bg-neutral-900 transition-all duration-300 text-neutral-700 dark:text-neutral-300 no-underline"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                  Sign In
+                </Link>
+                <Link 
+                  href="/marketplace"
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-semibold transition-all duration-300 hover:scale-[1.02] no-underline"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                  Shop Now
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
           <button 
             className="md:hidden p-3 rounded-2xl hover:bg-stone-50 dark:hover:bg-neutral-900 z-50 transition-all duration-300" 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
+            aria-label="Toggle mobile menu"
           >
             <div className="w-6 space-y-1.5">
               <div className={`h-0.5 bg-neutral-700 dark:bg-neutral-300 rounded transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
@@ -136,12 +287,28 @@ export default function Header() {
               <button 
                 onClick={() => setIsMenuOpen(false)} 
                 className="p-2 hover:bg-stone-50 dark:hover:bg-neutral-900 rounded-2xl transition-all duration-300"
+                aria-label="Close mobile menu"
               >
                 <svg className="w-6 h-6 text-neutral-700 dark:text-neutral-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
+
+            {/* User Info Section for Mobile */}
+            {isAuthenticated && user && (
+              <div className="px-6 py-4 bg-stone-50 dark:bg-neutral-900 border-b border-stone-200 dark:border-neutral-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold">
+                    {getInitials(user.name)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-neutral-900 dark:text-neutral-100">{user.name}</p>
+                    <p className="text-sm text-neutral-600 dark:text-neutral-400">{user.email}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex-1 px-6 pt-8">
               <nav className="space-y-3">
@@ -175,24 +342,48 @@ export default function Header() {
                 <button 
                   onClick={toggleDarkMode} 
                   className={`w-12 h-6 rounded-full transition-all duration-300 ${isDark ? 'bg-primary' : 'bg-stone-300 dark:bg-neutral-700'}`}
+                  aria-label="Toggle dark mode"
                 >
                   <div className={`w-5 h-5 bg-white rounded-full transition-all duration-300 ${isDark ? 'translate-x-6' : 'translate-x-0.5'}`} />
                 </button>
               </div>
 
+              {/* Mobile Auth Buttons */}
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-center gap-3 py-4 font-semibold bg-stone-100 hover:bg-stone-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-3xl transition-all duration-300">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                  </svg>
-                  <span>Sign In</span>
-                </button>
-                <button className="w-full flex items-center justify-center gap-3 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-3xl transition-all duration-300">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                    <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                  </svg>
-                  <span>Get Started</span>
-                </button>
+                {isAuthenticated ? (
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-center gap-3 py-4 font-semibold bg-red-100 hover:bg-red-200 dark:bg-red-950/30 dark:hover:bg-red-950/50 text-red-700 dark:text-red-400 rounded-3xl transition-all duration-300"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                      <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>Sign Out</span>
+                  </button>
+                ) : (
+                  <>
+                    <Link 
+                      href="/auth"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full flex items-center justify-center gap-3 py-4 font-semibold bg-stone-100 hover:bg-stone-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-neutral-900 dark:text-neutral-100 rounded-3xl transition-all duration-300 no-underline"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                      </svg>
+                      <span>Sign In</span>
+                    </Link>
+                    <Link 
+                      href="/marketplace"
+                      onClick={() => setIsMenuOpen(false)}
+                      className="w-full flex items-center justify-center gap-3 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-3xl transition-all duration-300 no-underline"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                      </svg>
+                      <span>Shop Now</span>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
